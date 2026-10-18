@@ -10,9 +10,12 @@ concurrency:
 permissions:
   contents: write
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   run-quant-bot:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
       - name: Checkout Repository
@@ -22,10 +25,9 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: 'pip'
 
       - name: Install Dependencies
-        run: pip install pandas numpy requests google-genai
+        run: pip install --upgrade pip && pip install pandas numpy requests google-genai
 
       - name: Execute Audited Quant Bot
         env:
@@ -38,5 +40,12 @@ jobs:
         run: |
           git config --global user.name "QuantBot State Manager"
           git config --global user.email "bot@github.com"
-          git add trade_state.json trade_history.json || true
-          git diff --staged --quiet || (git pull --rebase origin main && git commit -m "chore: sync trade state [skip ci]" && git push)
+          touch trade_state.json trade_history.json
+          git add trade_state.json trade_history.json
+          if ! git diff --staged --quiet; then
+            git commit -m "chore: sync trade state [skip ci]"
+            git pull --rebase origin main
+            git push origin main
+          else
+            echo "Tidak ada perubahan state untuk disimpan."
+          fi
