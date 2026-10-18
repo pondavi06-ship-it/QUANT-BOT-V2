@@ -4,7 +4,7 @@
   "coin": "ZECUSDT",
   "bias": "SHORT",
   "entry": 1125.51,
-  "sl": 1136.569012,
+  "sl": 1125.51,
   "original_sl": 1136.569012,
   "tp1": 1108.921482,
   "tp2": 1092.332965,
@@ -12,9 +12,9 @@
   "margin_usdt": 2.5,
   "leverage": 10,
   "notional_usdt": 25.0,
-  "tp1_hit": false,
+  "tp1_hit": true,
   "tp2_hit": false,
-  "last_checked_candle_ts": 1792329300000,
+  "last_checked_candle_ts": 1792330200000,
   "daily_tracker": {
     "date": "2026-10-18",
     "symbols": [
