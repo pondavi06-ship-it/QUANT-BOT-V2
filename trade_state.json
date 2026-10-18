@@ -1,22 +1,24 @@
 {
   "equity_usdt": 10.0,
-  "active": false,
-  "coin": null,
-  "bias": null,
-  "entry": null,
-  "sl": null,
-  "original_sl": null,
-  "tp1": null,
-  "tp2": null,
-  "tp3": null,
-  "margin_usdt": null,
-  "leverage": null,
-  "notional_usdt": null,
+  "active": true,
+  "coin": "ZECUSDT",
+  "bias": "SHORT",
+  "entry": 1125.51,
+  "sl": 1136.569012,
+  "original_sl": 1136.569012,
+  "tp1": 1108.921482,
+  "tp2": 1092.332965,
+  "tp3": 1070.214941,
+  "margin_usdt": 2.5,
+  "leverage": 10,
+  "notional_usdt": 25.0,
   "tp1_hit": false,
   "tp2_hit": false,
-  "last_checked_candle_ts": 0,
+  "last_checked_candle_ts": 1792327500000,
   "daily_tracker": {
     "date": "2026-10-18",
-    "symbols": []
+    "symbols": [
+      "ZECUSDT"
+    ]
   }
 }
