@@ -1,0 +1,42 @@
+name: Serverless Quant Trading Bot
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: quant-bot-state-lock
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  run-quant-bot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: pip install pandas numpy requests google-genai
+
+      - name: Execute Audited Quant Bot
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python main.py
+
+      - name: Commit Updated State Atomically
+        run: |
+          git config --global user.name "QuantBot State Manager"
+          git config --global user.email "bot@github.com"
+          git add trade_state.json trade_history.json || true
+          git diff --staged --quiet || (git pull --rebase origin main && git commit -m "chore: sync trade state [skip ci]" && git push)
