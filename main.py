@@ -54,6 +54,10 @@ def atomic_write_json(filepath: str, data: dict | list) -> None:
         temp_name = tmp_file.name
     os.replace(temp_name, filepath)
 
+def ensure_persistence_files() -> None:
+    if not os.path.exists(HISTORY_FILE):
+        atomic_write_json(HISTORY_FILE, [])
+
 def load_trade_state() -> dict:
     today = get_trading_day()
     default_state = {
@@ -81,8 +85,10 @@ def load_trade_state() -> dict:
     if os.path.exists(STATE_FILE):
         try:
             with open(STATE_FILE, "r", encoding="utf-8") as f:
-                loaded = json.load(f)
-                default_state.update(loaded)
+                content = f.read().strip()
+                if content:
+                    loaded = json.loads(content)
+                    default_state.update(loaded)
         except Exception as e:
             print(f"⚠️ Gagal membaca {STATE_FILE}, membuat state baru: {e}")
 
@@ -117,7 +123,9 @@ def load_trade_history() -> list:
     if os.path.exists(HISTORY_FILE):
         try:
             with open(HISTORY_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
+                content = f.read().strip()
+                if content:
+                    return json.loads(content)
         except Exception:
             pass
     return []
@@ -138,10 +146,12 @@ def get_top_volume_coins(limit: int = 15) -> list[str]:
         res = requests.get(url, params=params, timeout=10).json()
         if res.get("code") == "00000" and "data" in res:
             sorted_coins = sorted(res["data"], key=lambda x: float(x.get("usdtVolume", 0)), reverse=True)
-            return [
+            coins = [
                 item["symbol"] for item in sorted_coins
                 if item["symbol"].endswith("USDT") and item["symbol"] not in EXCLUDED_COINS
             ][:limit]
+            print(f"✅ Berhasil memuat {len(coins)} koin volume tertinggi dari Bitget.")
+            return coins
     except Exception as e:
         print(f"⚠️ Gagal mengambil daftar ticker Bitget: {e}")
     return ["XRPUSDT", "ADAUSDT", "DOGEUSDT", "TRXUSDT", "LINKUSDT", "AVAXUSDT", "NEARUSDT"]
@@ -405,11 +415,11 @@ def format_pnl_appendix(plan: dict, equity: float, daily_symbols: list[str]) -> 
     )
 
 # =====================================================================
-# 5. INTEGRASI TELEGRAM & GEMINI VERIFIER
+# 5. INTEGRASI TELEGRAM & VERIFIKASI MODEL AKTIF GOOGLE AI STUDIO
 # =====================================================================
 def send_telegram_alert(message: str) -> None:
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
-        print("⚠️ TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID belum diset di GitHub Secrets.")
+        print("⚠️ TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID kosong! Pastikan sudah diisi di Settings -> Secrets -> Actions.")
         return
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
     try:
@@ -418,18 +428,95 @@ def send_telegram_alert(message: str) -> None:
     except Exception as e:
         print(f"❌ Telegram Network Error: {e}")
 
+def get_verified_ai_studio_models(client: genai.Client) -> list[str]:
+    """
+    Mengambil daftar model resmi yang benar-benar ada di akun Google AI Studio pengguna,
+    lalu mengurutkannya berdasarkan prioritas: 4 -> 3.8 -> 3.5 -> 3.1 Pro -> Fallback.
+    """
+    excluded_keywords = (
+        "embedding", "imagen", "veo", "tts", "audio", "image",
+        "live", "aqa", "learnlm", "robotics", "computer-use"
+    )
+    valid_models = []
+    try:
+        for m in client.models.list():
+            raw_name = getattr(m, "name", "")
+            short_name = raw_name.replace("models/", "")
+            low_name = short_name.lower()
+
+            if "gemini" not in low_name:
+                continue
+            if any(k in low_name for k in excluded_keywords):
+                continue
+
+            supported = getattr(m, "supported_actions", None)
+            if supported and "generateContent" not in supported:
+                continue
+
+            valid_models.append(short_name)
+    except Exception as e:
+        print(f"⚠️ Gagal mengambil daftar model dinamis dari AI Studio: {e}")
+
+    if not valid_models:
+        # Fallback jika list() gagal karena pembatasan jaringan sementara
+        return [
+            "gemini-4.0-flash", "gemini-3.8-flash", "gemini-3.5-flash",
+            "gemini-3.1-pro-preview", "gemini-3.1-pro", "gemini-3-flash-preview",
+            "gemini-2.5-flash"
+        ]
+
+    print(f"📋 Daftar Model Teks Resmi di AI Studio Anda: {valid_models}")
+
+    ordered_models = []
+    priority_tiers = [
+        "gemini-4",
+        "gemini-3.8",
+        "gemini-3.5",
+        "gemini-3.1-pro",
+        "gemini-3.1",
+        "gemini-3",
+        "gemini-2.5"
+    ]
+
+    for tier in priority_tiers:
+        tier_matches = [m for m in valid_models if m.lower().startswith(tier)]
+        # Utamakan model non-lite dan nama paling ringkas/stabil di tiap tier
+        tier_matches.sort(key=lambda x: (1 if "lite" in x.lower() else 0, len(x)))
+        for match in tier_matches:
+            if match not in ordered_models:
+                ordered_models.append(match)
+
+    # Tambahkan sisa model valid lainnya sebagai cadangan terakhir
+    for m in valid_models:
+        if m not in ordered_models:
+            ordered_models.append(m)
+
+    print(f"🎯 Urutan Prioritas Eksekusi Model: {ordered_models[:6]}")
+    return ordered_models
+
 def call_gemini(prompt: str) -> str | None:
     if not GEMINI_API_KEY:
-        print("⚠️ GEMINI_API_KEY belum diset di GitHub Secrets.")
+        print("⚠️ GEMINI_API_KEY kosong! Pastikan sudah diisi di Settings -> Secrets -> Actions.")
         return None
-    for model_name in ["gemini-2.5-flash", "gemini-3.1-flash-lite"]:
+
+    try:
+        client = genai.Client(api_key=GEMINI_API_KEY)
+    except Exception as e:
+        print(f"❌ Gagal menginisialisasi klien Gemini: {e}")
+        return None
+
+    candidate_models = get_verified_ai_studio_models(client)
+
+    for model_name in candidate_models:
         for _ in range(2):
             try:
-                client = genai.Client(api_key=GEMINI_API_KEY)
+                print(f"🤖 Menghubungi Model AI Studio: {model_name}...")
                 response = client.models.generate_content(model=model_name, contents=prompt)
-                return response.text.strip()
+                if response and response.text:
+                    print(f"✅ Respons diterima dari {model_name}")
+                    return response.text.strip()
             except Exception as e:
-                print(f"⚠️ Model {model_name} sibuk: {e}")
+                print(f"⚠️ Model {model_name} melewati giliran: {e}")
                 time.sleep(2)
     return None
 
@@ -437,6 +524,12 @@ def call_gemini(prompt: str) -> str | None:
 # 6. ORKESTRATOR UTAMA
 # =====================================================================
 def execute_serverless_quant_analysis() -> None:
+    print("🔧 Memeriksa konfigurasi Environment & File State...")
+    print(f"🔑 Status GEMINI_API_KEY: {'TERDETEKSI' if GEMINI_API_KEY else 'KOSONG'}")
+    print(f"🔑 Status TELEGRAM_BOT_TOKEN: {'TERDETEKSI' if TELEGRAM_BOT_TOKEN else 'KOSONG'}")
+    print(f"🔑 Status TELEGRAM_CHAT_ID: {'TERDETEKSI' if TELEGRAM_CHAT_ID else 'KOSONG'}")
+
+    ensure_persistence_files()
     state = load_trade_state()
     equity = float(state.get("equity_usdt", DEFAULT_EQUITY_USDT))
     history_lessons = load_trade_history()
