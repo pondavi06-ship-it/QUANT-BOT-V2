@@ -24,6 +24,10 @@ STATE_FILE = "trade_state.json"
 HISTORY_FILE = "trade_history.json"
 TIMEZONE = ZoneInfo("Asia/Jakarta")
 
+# Jam Aktif & Jam Tidur (WIB / Asia/Jakarta)
+SLEEP_START_HOUR = 23             # Mulai berhenti cari sinyal jam 23:00 WIB
+SLEEP_END_HOUR = 6                # Mulai aktif kembali jam 06:00 WIB
+
 # Parameter Modal & Risiko sesuai Audit Brief
 DEFAULT_EQUITY_USDT = 10.00
 MIN_MARGIN_RATIO = 0.20           # Minimal 20% ekuitas (2.00 USDT pada 10 USDT)
@@ -47,7 +51,75 @@ GRANULARITY_MS = {
 }
 
 # =====================================================================
-# 2. GENERATOR EFEK SUARA & SISTEM NOTIFIKASI PINTAR TELEGRAM
+# 2. DETEKTOR SESI PASAR DUNIA & JAM ISTIRAHAT (23:00 - 06:00 WIB)
+# =====================================================================
+def get_market_session_profile(now_jkt: datetime) -> dict:
+    """
+    Menentukan status jam tidur (23:00 - 06:00 WIB) dan mengoptimalkan parameter
+    pencarian sinyal pada Peak Hours (Sydney/Tokyo, London, dan New York).
+    """
+    hr = now_jkt.hour
+    mn = now_jkt.minute
+
+    # 1. NIGHT BLACKOUT (23:00 s/d 05:59 WIB)
+    if hr >= SLEEP_START_HOUR or hr < SLEEP_END_HOUR:
+        return {
+            "is_sleep_hours": True,
+            "session_name": "NIGHT_BLACKOUT (23:00 - 06:00 WIB)",
+            "is_peak": False,
+            "scan_limit": 0,
+            "min_vol_ratio": 99.0,
+            "require_instant_fill": True
+        }
+
+    # Pre-Sleep Guard: 22:15 - 22:59 WIB (Hanya terima sinyal yang langsung terjemput)
+    near_sleep = (hr == 22 and mn >= 15)
+
+    # 2. SYDNEY & TOKYO PEAK (06:00 - 09:59 WIB)
+    if 6 <= hr < 10:
+        return {
+            "is_sleep_hours": False,
+            "session_name": "🇦🇺🇯🇵 SYDNEY & TOKYO PEAK (Aus/Japan Session)",
+            "is_peak": True,
+            "scan_limit": 20,
+            "min_vol_ratio": 1.10,
+            "require_instant_fill": False
+        }
+
+    # 3. LONDON & EUROPE PEAK (14:00 - 18:59 WIB)
+    if 14 <= hr < 19:
+        return {
+            "is_sleep_hours": False,
+            "session_name": "🇬🇧🇪🇺 LONDON & EUROPE PEAK",
+            "is_peak": True,
+            "scan_limit": 20,
+            "min_vol_ratio": 1.10,
+            "require_instant_fill": False
+        }
+
+    # 4. NEW YORK & LONDON OVERLAP PEAK (19:00 - 22:59 WIB)
+    if 19 <= hr < 23:
+        return {
+            "is_sleep_hours": False,
+            "session_name": "🇺🇸 NEW YORK OVERLAP PEAK (US Session)",
+            "is_peak": True,
+            "scan_limit": 20,
+            "min_vol_ratio": 1.10,
+            "require_instant_fill": near_sleep
+        }
+
+    # 5. ASIAN MID-DAY TRANSITION (10:00 - 13:59 WIB) -> Filter volume lebih ketat
+    return {
+        "is_sleep_hours": False,
+        "session_name": "🌏 ASIAN MID-DAY SESSION",
+        "is_peak": False,
+        "scan_limit": 15,
+        "min_vol_ratio": 1.25,
+        "require_instant_fill": False
+    }
+
+# =====================================================================
+# 3. GENERATOR EFEK SUARA & SISTEM NOTIFIKASI PINTAR TELEGRAM
 # =====================================================================
 SOUND_PROFILES = {
     "SIGNAL": [(523.25, 0.12), (659.25, 0.12), (783.99, 0.22)],                 # Nada Naik Cepat (C5 -> E5 -> G5)
@@ -137,7 +209,7 @@ def send_telegram_alert(message: str, alert_type: str = "SILENT") -> None:
         print(f"❌ Telegram Network Error: {e}")
 
 # =====================================================================
-# 3. MANAJEMEN STATE ATOMIK & KUOTA 3 KOIN PER HARI (ASIA/JAKARTA)
+# 4. MANAJEMEN STATE ATOMIK & KUOTA 3 KOIN PER HARI (ASIA/JAKARTA)
 # =====================================================================
 def get_trading_day() -> str:
     return datetime.now(TIMEZONE).date().isoformat()
@@ -247,9 +319,9 @@ def save_trade_lesson(lesson_text: str) -> None:
     atomic_write_json(HISTORY_FILE, history[-5:])
 
 # =====================================================================
-# 4. PENGAMBILAN DATA BITGET & PEMBACA PERINTAH MANUAL TELEGRAM
+# 5. PENGAMBILAN DATA BITGET & PEMBACA PERINTAH MANUAL TELEGRAM
 # =====================================================================
-def get_top_volume_coins(limit: int = 15) -> list[str]:
+def get_top_volume_coins(limit: int = 20) -> list[str]:
     url = "https://api.bitget.com/api/v2/mix/market/tickers"
     params = {"productType": "USDT-FUTURES"}
     try:
@@ -287,7 +359,6 @@ def get_closed_candles(symbol: str, granularity: str, limit: int = 120) -> pd.Da
     return None
 
 def get_latest_market_price(symbol: str, fallback_price: float) -> float:
-    """Mengambil harga pasar terkini dari Bitget saat pengguna melakukan /cancel manual."""
     url = "https://api.bitget.com/api/v2/mix/market/ticker"
     params = {"symbol": symbol, "productType": "USDT-FUTURES"}
     try:
@@ -301,13 +372,6 @@ def get_latest_market_price(symbol: str, fallback_price: float) -> float:
     return fallback_price
 
 def process_telegram_commands(state: dict) -> dict:
-    """
-    Membaca pesan perintah dari pengguna di Telegram:
-    - /cancel [harga_opsional] : Membatalkan posisi/order aktif secara manual
-    - /filled                  : Mengonfirmasi Limit Order sudah terjemput
-    - /balance [angka]         : Mengatur ulang saldo ekuitas USDT
-    - /status                  : Mengecek status posisi & kuota koin harian
-    """
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
         return state
 
@@ -327,7 +391,9 @@ def process_telegram_commands(state: dict) -> dict:
     if not updates:
         return state
 
-    now_jkt_str = datetime.now(TIMEZONE).strftime("%Y-%m-%d %H:%M WIB")
+    now_jkt = datetime.now(TIMEZONE)
+    now_jkt_str = now_jkt.strftime("%Y-%m-%d %H:%M WIB")
+    session_info = get_market_session_profile(now_jkt)
     state_modified = False
 
     for upd in updates:
@@ -352,14 +418,11 @@ def process_telegram_commands(state: dict) -> dict:
         parts = raw_text.split()
         cmd = parts[0].lower().split("@")[0]
 
-        # -------------------------------------------------------------
-        # COMMAND 1: /cancel atau cancel (Batal Posisi / Pending Order)
-        # -------------------------------------------------------------
         if cmd in ("/cancel", "cancel", "/batal", "batal", "/close", "close"):
             if not state.get("active"):
                 send_telegram_alert(
                     f"ℹ️ INFO COMMAND ({now_jkt_str})\n"
-                    f"Tidak ada posisi atau order aktif untuk dibatalkan. Bot sedang dalam mode Scanning.",
+                    f"Tidak ada posisi atau order aktif untuk dibatalkan.",
                     alert_type="SILENT"
                 )
             else:
@@ -370,7 +433,6 @@ def process_telegram_commands(state: dict) -> dict:
                 equity = float(state.get("equity_usdt", DEFAULT_EQUITY_USDT))
                 was_filled = bool(state.get("entry_filled", False))
 
-                # Jika masih Pending (belum kejemput), kembalikan kuota koin harian tanpa potong saldo
                 if not was_filled and len(parts) == 1:
                     refund_cancelled_symbol_slot(coin, state)
                     state.update(get_empty_position_fields())
@@ -379,13 +441,11 @@ def process_telegram_commands(state: dict) -> dict:
                         f"🟡⚠️ [MANUAL CANCEL — ORDER PENDING DIHAPUS] ⚠️🟡\n"
                         f"Waktu: {now_jkt_str}\n"
                         f"Koin: {coin} ({bias})\n"
-                        f"Status: Limit Order dibatalkan manual oleh Anda sebelum terjemput.\n"
-                        f"Kuota Koin Hari Ini Dikembalikan: {len(state['daily_tracker']['symbols'])}/{MAX_UNIQUE_COINS_PER_DAY} | Saldo Tetap: {equity:.2f} USDT\n"
-                        f"Bot sekarang langsung kembali memindai koin lain!",
+                        f"Status: Limit Order dibatalkan manual sebelum terjemput.\n"
+                        f"Kuota Koin Hari Ini Dikembalikan: {len(state['daily_tracker']['symbols'])}/{MAX_UNIQUE_COINS_PER_DAY} | Saldo: {equity:.2f} USDT",
                         alert_type="CANCEL"
                     )
                 else:
-                    # Jika posisi sudah berjalan (atau user menyertakan harga exit manual: /cancel 0.543)
                     custom_exit = None
                     if len(parts) > 1:
                         try:
@@ -406,14 +466,10 @@ def process_telegram_commands(state: dict) -> dict:
                         f"Koin: {coin} ({bias})\n"
                         f"Harga Entry: {entry} | Harga Exit Manual: {exit_px}\n"
                         f"Estimasi PnL Bersih (Setelah Fee): {realized_pnl:+.2f} USDT\n"
-                        f"Estimasi Saldo Baru: {state['equity_usdt']:.2f} USDT\n"
-                        f"Status: Posisi direset. Bot langsung lanjut memindai peluang baru!",
+                        f"Estimasi Saldo Baru: {state['equity_usdt']:.2f} USDT",
                         alert_type="CANCEL"
                     )
 
-        # -------------------------------------------------------------
-        # COMMAND 2: /filled atau filled (Paksa Tandai Order Terjemput)
-        # -------------------------------------------------------------
         elif cmd in ("/filled", "filled", "/masuk", "masuk"):
             if state.get("active"):
                 state["entry_filled"] = True
@@ -424,14 +480,8 @@ def process_telegram_commands(state: dict) -> dict:
                     alert_type="SILENT"
                 )
             else:
-                send_telegram_alert(
-                    f"ℹ️ Tidak ada order pending yang sedang menunggu konfirmasi /filled.",
-                    alert_type="SILENT"
-                )
+                send_telegram_alert("ℹ️ Tidak ada order pending untuk dikonfirmasi.", alert_type="SILENT")
 
-        # -------------------------------------------------------------
-        # COMMAND 3: /balance [nominal] (Sinkronisasi Saldo Manual)
-        # -------------------------------------------------------------
         elif cmd in ("/balance", "/saldo", "saldo") and len(parts) > 1:
             try:
                 new_bal = float(parts[1].replace(",", "."))
@@ -446,9 +496,6 @@ def process_telegram_commands(state: dict) -> dict:
             except ValueError:
                 pass
 
-        # -------------------------------------------------------------
-        # COMMAND 4: /status atau status (Cek Status Bot)
-        # -------------------------------------------------------------
         elif cmd in ("/status", "status"):
             pos_info = (
                 f"{state['coin']} ({state['bias']} {state['leverage']}x) | Entry: {state['entry']} | SL: {state['sl']} | Filled: {state['entry_filled']}"
@@ -456,10 +503,11 @@ def process_telegram_commands(state: dict) -> dict:
             )
             send_telegram_alert(
                 f"📋 STATUS BOT SAAT INI ({now_jkt_str})\n"
+                f"• Sesi Pasar: {session_info['session_name']}\n"
+                f"• Jam Aktif Sinyal: 06:00 - 23:00 WIB (23:00-06:00 WIB Mode Tidur)\n"
                 f"• Saldo Akun: {state.get('equity_usdt', DEFAULT_EQUITY_USDT):.2f} USDT\n"
                 f"• Posisi Aktif: {pos_info}\n"
-                f"• Kuota Koin Hari Ini: {len(state['daily_tracker']['symbols'])}/{MAX_UNIQUE_COINS_PER_DAY} ({', '.join(state['daily_tracker']['symbols']) or 'Kosong'})\n"
-                f"• Daftar Perintah: /cancel, /cancel [harga], /filled, /balance [angka], /status",
+                f"• Kuota Koin Hari Ini: {len(state['daily_tracker']['symbols'])}/{MAX_UNIQUE_COINS_PER_DAY} ({', '.join(state['daily_tracker']['symbols']) or 'Kosong'})",
                 alert_type="SILENT"
             )
 
@@ -468,7 +516,7 @@ def process_telegram_commands(state: dict) -> dict:
     return state
 
 # =====================================================================
-# 5. INDIKATOR, FILTER STRUKTUR & DETEKSI AUTO-CANCEL
+# 6. INDIKATOR, FILTER STRUKTUR & DETEKSI AUTO-CANCEL
 # =====================================================================
 def compute_indicators(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
@@ -525,7 +573,12 @@ def check_structural_invalidation_cancel(df_1h: pd.DataFrame, df_15m: pd.DataFra
 
     return False, ""
 
-def evaluate_snapshot_at_cutoff(df_4h: pd.DataFrame, df_1h: pd.DataFrame, df_15m_slice: pd.DataFrame) -> dict | None:
+def evaluate_snapshot_at_cutoff(
+    df_4h: pd.DataFrame,
+    df_1h: pd.DataFrame,
+    df_15m_slice: pd.DataFrame,
+    min_vol_ratio: float = 1.15
+) -> dict | None:
     if len(df_15m_slice) < 40:
         return None
     cutoff_ts = int(df_15m_slice["close_ts"].iloc[-1])
@@ -560,7 +613,7 @@ def evaluate_snapshot_at_cutoff(df_4h: pd.DataFrame, df_1h: pd.DataFrame, df_15m
     body_ratio = abs(float(last["close"] - last["open"])) / candle_range
 
     vol_ratio = float(last["volume"] / (last["vol_sma20"] + 1e-10))
-    volume_status = "VALID_VOL" if vol_ratio >= 1.15 else "LOW_VOLUME_FAKE"
+    volume_status = "VALID_VOL" if vol_ratio >= min_vol_ratio else "LOW_VOLUME_FAKE"
 
     trigger_type = "NONE"
     sweep_level = None
@@ -717,7 +770,7 @@ def build_deterministic_trade_plan(coin: str, snap: dict, equity_usdt: float) ->
         "close_ts": snap["close_ts"]
     }
 
-def format_pnl_appendix(plan: dict, equity: float, daily_symbols: list[str]) -> str:
+def format_pnl_appendix(plan: dict, equity: float, daily_symbols: list[str], session_name: str) -> str:
     m = plan["margin_usdt"]
     lev = plan["leverage"]
     return (
@@ -730,6 +783,7 @@ def format_pnl_appendix(plan: dict, equity: float, daily_symbols: list[str]) -> 
         f"• Profit Cicil (40% TP1 + 40% TP2 + 20% TP3): +{plan['blended_2usd']:.2f} USDT\n"
         f"----------------------------------------\n"
         f"🛡️ REKOMENDASI AUDIT (MARGIN 25% EKUITAS = {m:.2f} USDT | LEV {lev}x)\n"
+        f"• Sesi Pasar: {session_name}\n"
         f"• Kuota Koin Hari Ini: {len(daily_symbols)}/{MAX_UNIQUE_COINS_PER_DAY} ({', '.join(daily_symbols)})\n"
         f"• Risiko Bersih SL: -{plan['net_loss_sl_usdt']:.2f} USDT\n"
         f"• Target Bersih Cicil 3-Tier: +{plan['blended_net_gain_usdt']:.2f} USDT\n"
@@ -737,7 +791,7 @@ def format_pnl_appendix(plan: dict, equity: float, daily_symbols: list[str]) -> 
     )
 
 # =====================================================================
-# 6. VERIFIKASI MODEL AKTIF GOOGLE AI STUDIO (4 -> 3.8 -> 3.5 -> 3.1 PRO)
+# 7. VERIFIKASI MODEL AKTIF GOOGLE AI STUDIO (4 -> 3.8 -> 3.5 -> 3.1 PRO)
 # =====================================================================
 def get_verified_ai_studio_models(client: genai.Client) -> list[str]:
     excluded_keywords = (
@@ -823,22 +877,25 @@ def call_gemini(prompt: str) -> str | None:
     return None
 
 # =====================================================================
-# 7. ORKESTRATOR UTAMA (COMMAND LISTENER + MANAGING + SCANNING)
+# 8. ORKESTRATOR UTAMA (NIGHT BLACKOUT + PEAK SESSION ENGINE)
 # =====================================================================
 def execute_serverless_quant_analysis() -> None:
     print("🔧 Memeriksa konfigurasi Environment & File State...")
     ensure_persistence_files()
     state = load_trade_state()
 
-    # LANGKAH 1: Periksa apakah ada perintah /cancel, /filled, /balance, atau /status dari Telegram
+    # LANGKAH 1: Tetap baca perintah /cancel atau /status dari Telegram kapan saja
     state = process_telegram_commands(state)
 
     equity = float(state.get("equity_usdt", DEFAULT_EQUITY_USDT))
     history_lessons = load_trade_history()
-    now_jkt_str = datetime.now(TIMEZONE).strftime("%Y-%m-%d %H:%M WIB")
+    now_jkt = datetime.now(TIMEZONE)
+    now_jkt_str = now_jkt.strftime("%Y-%m-%d %H:%M WIB")
+    session_info = get_market_session_profile(now_jkt)
+    is_sleep_hours = session_info["is_sleep_hours"]
 
     # =================================================================
-    # MODE A: MEMANTAU POSISI / PENDING ORDER & FITUR AUTO-CANCEL
+    # MODE A: MEMANTAU POSISI / PENDING ORDER
     # =================================================================
     if state["active"]:
         coin = state["coin"]
@@ -849,6 +906,22 @@ def execute_serverless_quant_analysis() -> None:
         tp3 = float(state["tp3"])
         notional = float(state.get("notional_usdt", 30.0))
 
+        # PROTEKSI JAM TIDUR (23:00 - 06:00 WIB):
+        # Jika masuk jam 23:00 WIB dan Limit Order BELUM terjemput, langsung batalkan agar tidak terjemput saat tidur!
+        if is_sleep_hours and not state.get("entry_filled", False):
+            refund_cancelled_symbol_slot(coin, state)
+            state.update(get_empty_position_fields())
+            save_trade_state(state)
+            send_telegram_alert(
+                f"🌙⚠️ [NIGHT BLACKOUT AUTO-CANCEL — 23:00 WIB] ⚠️🌙\n"
+                f"Waktu: {now_jkt_str}\n"
+                f"Koin: {coin} ({bias})\n"
+                f"Alasan: Memasuki jam istirahat (23:00 - 06:00 WIB) dan Limit Order ({entry}) belum terjemput.\n"
+                f"Tindakan: Hapus Limit Order di Bitget agar tidak tereksekusi tanpa pengawasan saat Anda tidur. Kuota koin harian dikembalikan.",
+                alert_type="CANCEL"
+            )
+            return
+
         print(f"🔒 MODE MANAGING: Memantau {coin} ({bias}) | Filled={state.get('entry_filled', True)}...")
         df_1h = get_closed_candles(coin, "1H", limit=80)
         df_15m = get_closed_candles(coin, "15m", limit=35)
@@ -858,17 +931,18 @@ def execute_serverless_quant_analysis() -> None:
         last_ts = int(state.get("last_checked_candle_ts", 0))
         new_candles = df_15m[df_15m["close_ts"] > last_ts].copy()
         if new_candles.empty:
-            current_price = float(df_15m["close"].iloc[-1])
-            status_str = "HOLD POSISI AKTIF" if state.get("entry_filled", True) else f"MENUNGGU LIMIT ({state.get('pending_candles_count', 0)}/{MAX_PENDING_CANDLES} candle)"
-            send_telegram_alert(
-                f"🔵🔵 [STAY ON POSITION — SILENT] 🔵🔵\n"
-                f"Waktu: {now_jkt_str}\n"
-                f"Koin: {coin} ({bias} {state['leverage']}x)\n"
-                f"Status: {status_str}\n"
-                f"Harga Saat Ini: {current_price} | Entry: {entry} | SL: {state['sl']}\n"
-                f"(Ketik /cancel jika ingin membatalkan manual)",
-                alert_type="STAY"
-            )
+            # Jangan kirim pesan Stay on Position sama sekali saat jam tidur 23:00 - 06:00 WIB
+            if not is_sleep_hours:
+                current_price = float(df_15m["close"].iloc[-1])
+                status_str = "HOLD POSISI AKTIF" if state.get("entry_filled", True) else f"MENUNGGU LIMIT ({state.get('pending_candles_count', 0)}/{MAX_PENDING_CANDLES} candle)"
+                send_telegram_alert(
+                    f"🔵🔵 [STAY ON POSITION — SILENT] 🔵🔵\n"
+                    f"Waktu: {now_jkt_str} | {session_info['session_name']}\n"
+                    f"Koin: {coin} ({bias} {state['leverage']}x)\n"
+                    f"Status: {status_str}\n"
+                    f"Harga Saat Ini: {current_price} | Entry: {entry} | SL: {state['sl']}",
+                    alert_type="STAY"
+                )
             return
 
         sl_triggered = False
@@ -938,6 +1012,11 @@ def execute_serverless_quant_analysis() -> None:
                     exit_price = tp3
                     break
 
+        # Saat jam tidur (23:00-06:00 WIB), ubah notifikasi penutupan posisi menjadi SILENT agar tidak membangunkan tidur
+        out_alert_tp = "SILENT" if is_sleep_hours else "TP"
+        out_alert_sl = "SILENT" if is_sleep_hours else "SL"
+        out_alert_cancel = "SILENT" if is_sleep_hours else "CANCEL"
+
         if cancelled_unfilled:
             refund_cancelled_symbol_slot(coin, state)
             state.update(get_empty_position_fields())
@@ -948,7 +1027,7 @@ def execute_serverless_quant_analysis() -> None:
                 f"Koin: {coin} ({bias})\n"
                 f"Alasan Cancel: {cancel_reason}\n"
                 f"Tindakan: Hapus Limit Order di Bitget. Kuota harian koin dikembalikan ({len(state['daily_tracker']['symbols'])}/{MAX_UNIQUE_COINS_PER_DAY}).",
-                alert_type="CANCEL"
+                alert_type=out_alert_cancel
             )
             return
 
@@ -962,7 +1041,7 @@ def execute_serverless_quant_analysis() -> None:
                     f"Koin: {coin} ({bias})\nStatus: BE HIT pada {exit_price}\n"
                     f"Profit TP1 (40%) Tersimpan: +{tp1_part_gain:.2f} USDT\n"
                     f"Estimasi Saldo: {state['equity_usdt']:.2f} USDT",
-                    alert_type="TP"
+                    alert_type=out_alert_tp
                 )
             else:
                 sl_loss = (notional * (abs(entry - exit_price) / entry)) + (notional * ROUND_TRIP_COST_RATE)
@@ -980,7 +1059,7 @@ def execute_serverless_quant_analysis() -> None:
                     f"Waktu: {now_jkt_str}\n"
                     f"Koin: {coin} ({bias})\nExit: {exit_price} (-{sl_loss:.2f} USDT)\n"
                     f"Estimasi Saldo: {state['equity_usdt']:.2f} USDT\nEvaluasi: {ai_resp}",
-                    alert_type="SL"
+                    alert_type=out_alert_sl
                 )
 
             state.update(get_empty_position_fields())
@@ -998,7 +1077,7 @@ def execute_serverless_quant_analysis() -> None:
                 f"Koin: {coin} ({bias})\nExit TP3: {exit_price}\n"
                 f"Total Profit Bersih: +{blended_gain:.2f} USDT\n"
                 f"Estimasi Saldo: {state['equity_usdt']:.2f} USDT",
-                alert_type="TP"
+                alert_type=out_alert_tp
             )
             state.update(get_empty_position_fields())
             save_trade_state(state)
@@ -1023,7 +1102,7 @@ def execute_serverless_quant_analysis() -> None:
                 f"Koin: {coin} ({bias})\n"
                 f"Penyebab: {invalid_reason}\n"
                 f"Instruksi: {action_text}",
-                alert_type="CANCEL"
+                alert_type=out_alert_cancel
             )
             return
 
@@ -1037,13 +1116,13 @@ def execute_serverless_quant_analysis() -> None:
                 f"Koin: {coin} ({bias} {state['leverage']}x)\n"
                 f"Harga Saat Ini: {exit_price} | SL Aktif Sekarang: {state['sl']}\n"
                 f"Tindakan: Amankan profit cicilan Anda dan pastikan SL sudah berada di titik Entry ({entry})!",
-                alert_type="TP"
+                alert_type=out_alert_tp
             )
-        else:
+        elif not is_sleep_hours:
             status_label = "AKTIF HOLD POSISI" if state.get("entry_filled", False) else f"MENUNGGU LIMIT ({state.get('pending_candles_count', 0)}/{MAX_PENDING_CANDLES})"
             send_telegram_alert(
                 f"🔵🔵 [STAY ON POSITION — SILENT] 🔵🔵\n"
-                f"Waktu: {now_jkt_str}\n"
+                f"Waktu: {now_jkt_str} | {session_info['session_name']}\n"
                 f"Koin: {coin} ({bias} {state['leverage']}x) | Status: {status_label}\n"
                 f"Harga Penutupan 15m: {exit_price} | Entry: {entry} | SL Aktif: {state['sl']}\n"
                 f"TP1 Hit: {state['tp1_hit']} | TP2 Hit: {state['tp2_hit']} | Ketik /cancel untuk batal manual",
@@ -1052,10 +1131,18 @@ def execute_serverless_quant_analysis() -> None:
         return
 
     # =================================================================
-    # MODE B: SCANNING KANDIDAT BARU
+    # MODE B: SCANNING KANDIDAT BARU (BLOKIR PENUH JAM 23:00 - 06:00 WIB)
     # =================================================================
-    print(f"🕵️ MODE SCANNING ({now_jkt_str}) | Simbol Hari Ini: {state['daily_tracker']['symbols']}")
-    monitored_coins = get_top_volume_coins(limit=15)
+    if is_sleep_hours:
+        print(f"🌙 NIGHT BLACKOUT ({now_jkt_str}): Jam istirahat 23:00 - 06:00 WIB. Tidak mencari sinyal & tidak mengirim pesan.")
+        save_trade_state(state)
+        return
+
+    scan_limit = session_info["scan_limit"]
+    min_vol_ratio = session_info["min_vol_ratio"]
+    print(f"🕵️ MODE SCANNING ({now_jkt_str}) | Sesi: {session_info['session_name']} | Limit={scan_limit} Koin | MinVol={min_vol_ratio}x")
+
+    monitored_coins = get_top_volume_coins(limit=scan_limit)
     valid_candidates = []
     aligned_trends = []
 
@@ -1072,7 +1159,7 @@ def execute_serverless_quant_analysis() -> None:
         trajectory = []
         for offset in [-3, -2, -1, 0]:
             sliced_15m = df_15m.iloc[:len(df_15m) + offset].reset_index(drop=True)
-            snap = evaluate_snapshot_at_cutoff(df_4h, df_1h, sliced_15m)
+            snap = evaluate_snapshot_at_cutoff(df_4h, df_1h, sliced_15m, min_vol_ratio=min_vol_ratio)
             if snap:
                 trajectory.append(snap)
 
@@ -1082,6 +1169,13 @@ def execute_serverless_quant_analysis() -> None:
                 aligned_trends.append(f"{coin} ({latest_snap['macro_trend_4h']})")
             trade_plan = build_deterministic_trade_plan(coin, latest_snap, equity)
             if trade_plan:
+                # Jika sudah pukul 22:15 - 22:59 WIB, hanya izinkan sinyal yang langsung terjemput
+                current_close = latest_snap["price"]
+                instantly_filled = (trade_plan["bias"] == "LONG" and current_close <= trade_plan["entry"]) or (
+                                    trade_plan["bias"] == "SHORT" and current_close >= trade_plan["entry"])
+                if session_info["require_instant_fill"] and not instantly_filled:
+                    continue
+
                 trade_plan["trajectory"] = trajectory
                 valid_candidates.append(trade_plan)
 
@@ -1091,7 +1185,7 @@ def execute_serverless_quant_analysis() -> None:
         send_telegram_alert(
             f"⚪⚪ [SILENT SCAN: BELUM ADA KOIN] ⚪⚪\n"
             f"Waktu: {now_jkt_str}\n"
-            f"Status: NO_TRADE (Menunggu konfirmasi Volume + ATR + RSI/MACD)\n"
+            f"Sesi: {session_info['session_name']} (Min Vol: {min_vol_ratio}x)\n"
             f"Koin Tren 4H/1H Searah: {aligned_str}\n"
             f"Kuota Koin Hari Ini: {len(state['daily_tracker']['symbols'])}/{MAX_UNIQUE_COINS_PER_DAY} | Saldo: {equity:.2f} USDT",
             alert_type="NO_TRADE"
@@ -1103,7 +1197,7 @@ def execute_serverless_quant_analysis() -> None:
 
     lessons_str = "\n".join([f"- {item['lesson']}" for item in history_lessons]) if history_lessons else "Belum ada catatan."
     prompt = (
-        f"Anda adalah Senior Quantitative Risk Auditor. Evaluasi kandidat sinyal berikut:\n"
+        f"Anda adalah Senior Quantitative Risk Auditor pada sesi {session_info['session_name']}. Evaluasi kandidat sinyal berikut:\n"
         f"Koin: {best_plan['coin']} | Bias: {best_plan['bias']} | Trigger 15m: {best_plan['trigger_type']}\n"
         f"Entry: {best_plan['entry']} | SL: {best_plan['sl']} | TP1: {best_plan['tp1']} | TP2: {best_plan['tp2']} | TP3: {best_plan['tp3']}\n"
         f"Trajektori 4 Candle 15m Terakhir: {json.dumps(best_plan['trajectory'])}\n"
@@ -1119,7 +1213,7 @@ def execute_serverless_quant_analysis() -> None:
         save_trade_state(state)
         send_telegram_alert(
             f"⚪🛑 [SILENT SCAN: KANDIDAT DITOLAK AI] 🛑⚪\n"
-            f"Waktu: {now_jkt_str}\n"
+            f"Waktu: {now_jkt_str} | {session_info['session_name']}\n"
             f"Koin: {best_plan['coin']} ({best_plan['bias']})\n"
             f"Alasan: {ai_review}",
             alert_type="NO_TRADE"
@@ -1159,6 +1253,7 @@ def execute_serverless_quant_analysis() -> None:
     signal_msg = (
         f"🟢🚀 [NEW SIGNAL DETECTED — DAPAT KOIN!] 🚀🟢\n"
         f"Waktu: {now_jkt_str}\n"
+        f"Sesi: {session_info['session_name']}\n"
         f"Koin: {best_plan['coin']} ({best_plan['bias']})\n"
         f"Trigger 15m: {best_plan['trigger_type']}\n"
         f"Volume Ratio: {best_plan['volume_ratio']}x SMA20 | RSI(14): {best_plan['rsi_15m']}\n"
@@ -1171,7 +1266,7 @@ def execute_serverless_quant_analysis() -> None:
         f"• TP3 (5.0R - Jual 20%): {best_plan['tp3']}\n"
         f"----------------------------------------\n"
         f"🧠 Analisis AI: {clean_narrative}"
-        + format_pnl_appendix(best_plan, equity, state["daily_tracker"]["symbols"])
+        + format_pnl_appendix(best_plan, equity, state["daily_tracker"]["symbols"], session_info["session_name"])
     )
     send_telegram_alert(signal_msg, alert_type="SIGNAL")
 
