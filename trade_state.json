@@ -1,25 +1,27 @@
 {
   "equity_usdt": 10.0,
-  "active": false,
-  "coin": null,
-  "bias": null,
-  "entry": null,
-  "sl": null,
-  "original_sl": null,
-  "tp1": null,
-  "tp2": null,
-  "tp3": null,
-  "margin_usdt": null,
-  "leverage": null,
-  "notional_usdt": null,
+  "active": true,
+  "coin": "CLUSDT",
+  "bias": "LONG",
+  "entry": 98.925713,
+  "sl": 98.327189,
+  "original_sl": 98.327189,
+  "tp1": 99.8235,
+  "tp2": 100.721287,
+  "tp3": 101.918336,
+  "margin_usdt": 2.5,
+  "leverage": 13,
+  "notional_usdt": 32.5,
   "entry_filled": false,
   "pending_candles_count": 0,
   "tp1_hit": false,
   "tp2_hit": false,
-  "last_checked_candle_ts": 0,
+  "last_checked_candle_ts": 1792466100000,
   "last_telegram_update_id": 420022510,
   "daily_tracker": {
     "date": "2026-10-20",
-    "symbols": []
+    "symbols": [
+      "CLUSDT"
+    ]
   }
 }
