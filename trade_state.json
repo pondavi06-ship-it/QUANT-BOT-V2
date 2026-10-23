@@ -12,11 +12,11 @@
   "margin_usdt": 2.44,
   "leverage": 10,
   "notional_usdt": 24.4,
-  "entry_filled": false,
+  "entry_filled": true,
   "pending_candles_count": 0,
   "tp1_hit": false,
   "tp2_hit": false,
-  "last_checked_candle_ts": 1792757700000,
+  "last_checked_candle_ts": 1792758600000,
   "last_telegram_update_id": 420022511,
   "daily_tracker": {
     "date": "2026-10-23",
