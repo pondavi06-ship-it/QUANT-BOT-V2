@@ -15,8 +15,8 @@
   "entry_filled": true,
   "pending_candles_count": 0,
   "tp1_hit": true,
-  "tp2_hit": false,
-  "last_checked_candle_ts": 1792717200000,
+  "tp2_hit": true,
+  "last_checked_candle_ts": 1792718100000,
   "last_telegram_update_id": 420022510,
   "daily_tracker": {
     "date": "2026-10-23",
