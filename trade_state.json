@@ -1,28 +1,27 @@
 {
   "equity_usdt": 10.13,
-  "active": true,
-  "coin": "SOXSUSDT",
-  "bias": "LONG",
-  "entry": 52.593211,
-  "sl": 52.120018,
-  "original_sl": 52.120018,
-  "tp1": 53.303,
-  "tp2": 54.012789,
-  "tp3": 54.959175,
-  "margin_usdt": 2.53,
-  "leverage": 10,
-  "notional_usdt": 25.3,
+  "active": false,
+  "coin": null,
+  "bias": null,
+  "entry": null,
+  "sl": null,
+  "original_sl": null,
+  "tp1": null,
+  "tp2": null,
+  "tp3": null,
+  "margin_usdt": null,
+  "leverage": null,
+  "notional_usdt": null,
   "entry_filled": false,
-  "pending_candles_count": 1,
+  "pending_candles_count": 0,
   "tp1_hit": false,
   "tp2_hit": false,
-  "last_checked_candle_ts": 1792828800000,
-  "last_telegram_update_id": 420022513,
+  "last_checked_candle_ts": 0,
+  "last_telegram_update_id": 420022515,
   "daily_tracker": {
     "date": "2026-10-24",
     "symbols": [
-      "HYPEUSDT",
-      "SOXSUSDT"
+      "HYPEUSDT"
     ]
   }
 }
