@@ -1,28 +1,27 @@
 {
   "equity_usdt": 9.75,
-  "active": true,
-  "coin": "SUIUSDT",
-  "bias": "SHORT",
-  "entry": 0.908109,
-  "sl": 0.916515,
-  "original_sl": 0.916515,
-  "tp1": 0.8955,
-  "tp2": 0.882891,
-  "tp3": 0.866079,
-  "margin_usdt": 2.44,
-  "leverage": 10,
-  "notional_usdt": 24.4,
+  "active": false,
+  "coin": null,
+  "bias": null,
+  "entry": null,
+  "sl": null,
+  "original_sl": null,
+  "tp1": null,
+  "tp2": null,
+  "tp3": null,
+  "margin_usdt": null,
+  "leverage": null,
+  "notional_usdt": null,
   "entry_filled": false,
   "pending_candles_count": 0,
   "tp1_hit": false,
   "tp2_hit": false,
-  "last_checked_candle_ts": 1792938600000,
-  "last_telegram_update_id": 420022515,
+  "last_checked_candle_ts": 0,
+  "last_telegram_update_id": 420022516,
   "daily_tracker": {
     "date": "2026-10-25",
     "symbols": [
-      "SNDKUSDT",
-      "SUIUSDT"
+      "SNDKUSDT"
     ]
   }
 }
