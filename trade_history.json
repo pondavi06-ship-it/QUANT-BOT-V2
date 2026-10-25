@@ -10,5 +10,9 @@
   {
     "timestamp": "2026-10-24 19:32 WIB",
     "lesson": "Berikan ruang hembus yang lebih longgar pada Stop Loss dengan mempertimbangkan Average True Range agar posisi tidak mudah terpicu oleh fluktuasi normal pasar."
+  },
+  {
+    "timestamp": "2026-10-25 20:19 WIB",
+    "lesson": "Berikan ruang bernapas yang lebih memadai pada jarak stop loss dengan mempertimbangkan Average True Range agar posisi tidak mudah terlikuidasi oleh fluktuasi harga minor."
   }
 ]
