@@ -1,25 +1,27 @@
 {
   "equity_usdt": 9.98,
-  "active": false,
-  "coin": null,
-  "bias": null,
-  "entry": null,
-  "sl": null,
-  "original_sl": null,
-  "tp1": null,
-  "tp2": null,
-  "tp3": null,
-  "margin_usdt": null,
-  "leverage": null,
-  "notional_usdt": null,
+  "active": true,
+  "coin": "WLDUSDT",
+  "bias": "SHORT",
+  "entry": 0.463389,
+  "sl": 0.467348,
+  "original_sl": 0.467348,
+  "tp1": 0.45745,
+  "tp2": 0.451511,
+  "tp3": 0.443593,
+  "margin_usdt": 2.5,
+  "leverage": 10,
+  "notional_usdt": 25.0,
   "entry_filled": false,
   "pending_candles_count": 0,
   "tp1_hit": false,
   "tp2_hit": false,
-  "last_checked_candle_ts": 0,
+  "last_checked_candle_ts": 1792916100000,
   "last_telegram_update_id": 420022515,
   "daily_tracker": {
     "date": "2026-10-25",
-    "symbols": []
+    "symbols": [
+      "WLDUSDT"
+    ]
   }
 }
