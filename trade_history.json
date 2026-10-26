@@ -14,5 +14,9 @@
   {
     "timestamp": "2026-10-25 20:19 WIB",
     "lesson": "Berikan ruang bernapas yang lebih memadai pada jarak stop loss dengan mempertimbangkan Average True Range agar posisi tidak mudah terlikuidasi oleh fluktuasi harga minor."
+  },
+  {
+    "timestamp": "2026-10-26 15:45 WIB",
+    "lesson": "Selalu perhitungkan rata-rata volatilitas harian aset saat memasang Stop Loss agar posisi tidak tersapu oleh pergerakan acak pasar sebelum analisis utama teruji."
   }
 ]
