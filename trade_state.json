@@ -1,25 +1,27 @@
 {
   "equity_usdt": 10.2,
-  "active": false,
-  "coin": null,
-  "bias": null,
-  "entry": null,
-  "sl": null,
-  "original_sl": null,
-  "tp1": null,
-  "tp2": null,
-  "tp3": null,
-  "margin_usdt": null,
-  "leverage": null,
-  "notional_usdt": null,
+  "active": true,
+  "coin": "MSTRUSDT",
+  "bias": "SHORT",
+  "entry": 140.975835,
+  "sl": 141.793058,
+  "original_sl": 141.793058,
+  "tp1": 139.75,
+  "tp2": 138.524165,
+  "tp3": 136.889718,
+  "margin_usdt": 2.55,
+  "leverage": 13,
+  "notional_usdt": 33.15,
   "entry_filled": false,
   "pending_candles_count": 0,
   "tp1_hit": false,
   "tp2_hit": false,
-  "last_checked_candle_ts": 0,
+  "last_checked_candle_ts": 1793276100000,
   "last_telegram_update_id": 420022516,
   "daily_tracker": {
     "date": "2026-10-29",
-    "symbols": []
+    "symbols": [
+      "MSTRUSDT"
+    ]
   }
 }
