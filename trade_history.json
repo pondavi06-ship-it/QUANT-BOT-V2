@@ -1,9 +1,5 @@
 [
   {
-    "timestamp": "2026-10-20 13:46 WIB",
-    "lesson": "Gunakan perhitungan Average True Range untuk memberikan ruang napas yang memadai bagi stop loss pada aset komoditas dengan volatilitas tinggi agar tidak mudah tersapu oleh pergerakan harga normal."
-  },
-  {
     "timestamp": "2026-10-23 09:03 WIB",
     "lesson": "Sesuaikan jarak stop loss dengan memperhitungkan rata-rata volatilitas harian pasar agar posisi tidak mudah tereliminasi oleh fluktuasi normal."
   },
@@ -18,5 +14,9 @@
   {
     "timestamp": "2026-10-26 15:45 WIB",
     "lesson": "Selalu perhitungkan rata-rata volatilitas harian aset saat memasang Stop Loss agar posisi tidak tersapu oleh pergerakan acak pasar sebelum analisis utama teruji."
+  },
+  {
+    "timestamp": "2026-10-29 20:19 WIB",
+    "lesson": "Berikan ruang stop loss yang lebih realistis dan adaptif terhadap volatilitas normal aset agar tidak mudah terpicu oleh fluktuasi harga minor."
   }
 ]
