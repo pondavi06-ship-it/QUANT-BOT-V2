@@ -1,25 +1,27 @@
 {
   "equity_usdt": 9.95,
-  "active": false,
-  "coin": null,
-  "bias": null,
-  "entry": null,
-  "sl": null,
-  "original_sl": null,
-  "tp1": null,
-  "tp2": null,
-  "tp3": null,
-  "margin_usdt": null,
-  "leverage": null,
-  "notional_usdt": null,
+  "active": true,
+  "coin": "XAGUSDT",
+  "bias": "SHORT",
+  "entry": 52.053127,
+  "sl": 52.338545,
+  "original_sl": 52.338545,
+  "tp1": 51.625,
+  "tp2": 51.196873,
+  "tp3": 50.626037,
+  "margin_usdt": 2.49,
+  "leverage": 14,
+  "notional_usdt": 34.86,
   "entry_filled": false,
   "pending_candles_count": 0,
   "tp1_hit": false,
   "tp2_hit": false,
-  "last_checked_candle_ts": 0,
+  "last_checked_candle_ts": 1793315700000,
   "last_telegram_update_id": 420022516,
   "daily_tracker": {
     "date": "2026-10-30",
-    "symbols": []
+    "symbols": [
+      "XAGUSDT"
+    ]
   }
 }
