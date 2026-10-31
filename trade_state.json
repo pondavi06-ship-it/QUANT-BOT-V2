@@ -1,25 +1,27 @@
 {
   "equity_usdt": 10.18,
-  "active": false,
-  "coin": null,
-  "bias": null,
-  "entry": null,
-  "sl": null,
-  "original_sl": null,
-  "tp1": null,
-  "tp2": null,
-  "tp3": null,
-  "margin_usdt": null,
-  "leverage": null,
-  "notional_usdt": null,
+  "active": true,
+  "coin": "ANTHROPICUSDT",
+  "bias": "SHORT",
+  "entry": 1698.479863,
+  "sl": 1711.906438,
+  "original_sl": 1711.906438,
+  "tp1": 1678.34,
+  "tp2": 1658.200138,
+  "tp3": 1631.346988,
+  "margin_usdt": 2.54,
+  "leverage": 10,
+  "notional_usdt": 25.4,
   "entry_filled": false,
   "pending_candles_count": 0,
   "tp1_hit": false,
   "tp2_hit": false,
-  "last_checked_candle_ts": 0,
+  "last_checked_candle_ts": 1793405700000,
   "last_telegram_update_id": 420022516,
   "daily_tracker": {
     "date": "2026-10-31",
-    "symbols": []
+    "symbols": [
+      "ANTHROPICUSDT"
+    ]
   }
 }
