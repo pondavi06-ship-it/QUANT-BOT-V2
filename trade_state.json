@@ -16,13 +16,10 @@
   "pending_candles_count": 0,
   "tp1_hit": true,
   "tp2_hit": false,
-  "last_checked_candle_ts": 1793551500000,
+  "last_checked_candle_ts": 1793552400000,
   "last_telegram_update_id": 420022516,
   "daily_tracker": {
-    "date": "2026-11-01",
-    "symbols": [
-      "ENAUSDT",
-      "SNDKUSDT"
-    ]
+    "date": "2026-11-02",
+    "symbols": []
   }
 }
