@@ -1,9 +1,5 @@
 [
   {
-    "timestamp": "2026-10-26 15:45 WIB",
-    "lesson": "Selalu perhitungkan rata-rata volatilitas harian aset saat memasang Stop Loss agar posisi tidak tersapu oleh pergerakan acak pasar sebelum analisis utama teruji."
-  },
-  {
     "timestamp": "2026-10-29 20:19 WIB",
     "lesson": "Berikan ruang stop loss yang lebih realistis dan adaptif terhadap volatilitas normal aset agar tidak mudah terpicu oleh fluktuasi harga minor."
   },
@@ -18,5 +14,9 @@
   {
     "timestamp": "2026-11-06 15:45 WIB",
     "lesson": "Selalu hitung volatilitas rata-rata harian dan tempatkan Stop Loss di luar area fluktuasi normal agar posisi tidak tereliminasi prematur oleh noise pasar."
+  },
+  {
+    "timestamp": "2026-11-07 11:45 WIB",
+    "lesson": "Selalu beri jarak Stop Loss sedikit lebih tinggi di atas level resistensi terkuat untuk mengantisipasi pergerakan harga sementara akibat volatilitas pasar."
   }
 ]
