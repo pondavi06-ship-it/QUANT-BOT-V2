@@ -1,25 +1,27 @@
 {
   "equity_usdt": 9.9,
-  "active": false,
-  "coin": null,
-  "bias": null,
-  "entry": null,
-  "sl": null,
-  "original_sl": null,
-  "tp1": null,
-  "tp2": null,
-  "tp3": null,
-  "margin_usdt": null,
-  "leverage": null,
-  "notional_usdt": null,
+  "active": true,
+  "coin": "XRPUSDT",
+  "bias": "SHORT",
+  "entry": 1.156152,
+  "sl": 1.162153,
+  "original_sl": 1.162153,
+  "tp1": 1.14715,
+  "tp2": 1.138148,
+  "tp3": 1.126145,
+  "margin_usdt": 2.48,
+  "leverage": 15,
+  "notional_usdt": 37.2,
   "entry_filled": false,
   "pending_candles_count": 0,
   "tp1_hit": false,
   "tp2_hit": false,
-  "last_checked_candle_ts": 0,
+  "last_checked_candle_ts": 1794108600000,
   "last_telegram_update_id": 420022516,
   "daily_tracker": {
     "date": "2026-11-08",
-    "symbols": []
+    "symbols": [
+      "XRPUSDT"
+    ]
   }
 }
