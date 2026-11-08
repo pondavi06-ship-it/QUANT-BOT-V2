@@ -1,9 +1,5 @@
 [
   {
-    "timestamp": "2026-10-29 20:19 WIB",
-    "lesson": "Berikan ruang stop loss yang lebih realistis dan adaptif terhadap volatilitas normal aset agar tidak mudah terpicu oleh fluktuasi harga minor."
-  },
-  {
     "timestamp": "2026-10-30 23:15 WIB",
     "lesson": "Atur jarak Stop Loss dengan memperhitungkan indikator ATR atau area swing low terakhir agar posisi memiliki ruang bernapas dari fluktuasi harga wajar."
   },
@@ -18,5 +14,9 @@
   {
     "timestamp": "2026-11-07 11:45 WIB",
     "lesson": "Selalu beri jarak Stop Loss sedikit lebih tinggi di atas level resistensi terkuat untuk mengantisipasi pergerakan harga sementara akibat volatilitas pasar."
+  },
+  {
+    "timestamp": "2026-11-08 11:18 WIB",
+    "lesson": "Berikan jarak Stop Loss yang rasional berbasis volatilitas atau swing high terdekat agar posisi tidak mudah terpicu oleh pergerakan acak pasar."
   }
 ]
