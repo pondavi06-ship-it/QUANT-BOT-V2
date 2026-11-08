@@ -1,9 +1,5 @@
 [
   {
-    "timestamp": "2026-10-30 23:15 WIB",
-    "lesson": "Atur jarak Stop Loss dengan memperhitungkan indikator ATR atau area swing low terakhir agar posisi memiliki ruang bernapas dari fluktuasi harga wajar."
-  },
-  {
     "timestamp": "2026-11-01 11:31 WIB",
     "lesson": "Selalu berikan buffer Stop Loss yang cukup di luar jangkauan fluktuasi acak pasar agar posisi tidak terhenti prematur oleh volatilitas singkat."
   },
@@ -18,5 +14,9 @@
   {
     "timestamp": "2026-11-08 11:18 WIB",
     "lesson": "Berikan jarak Stop Loss yang rasional berbasis volatilitas atau swing high terdekat agar posisi tidak mudah terpicu oleh pergerakan acak pasar."
+  },
+  {
+    "timestamp": "2026-11-08 19:15 WIB",
+    "lesson": "Berikan ruang bernapas yang cukup pada Stop Loss sesuai dengan rata-rata volatilitas harian aset agar posisi tidak mudah tereliminasi oleh pergerakan harga jangka pendek."
   }
 ]
