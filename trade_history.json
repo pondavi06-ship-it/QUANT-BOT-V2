@@ -1,9 +1,5 @@
 [
   {
-    "timestamp": "2026-11-01 11:31 WIB",
-    "lesson": "Selalu berikan buffer Stop Loss yang cukup di luar jangkauan fluktuasi acak pasar agar posisi tidak terhenti prematur oleh volatilitas singkat."
-  },
-  {
     "timestamp": "2026-11-06 15:45 WIB",
     "lesson": "Selalu hitung volatilitas rata-rata harian dan tempatkan Stop Loss di luar area fluktuasi normal agar posisi tidak tereliminasi prematur oleh noise pasar."
   },
@@ -18,5 +14,9 @@
   {
     "timestamp": "2026-11-08 19:15 WIB",
     "lesson": "Berikan ruang bernapas yang cukup pada Stop Loss sesuai dengan rata-rata volatilitas harian aset agar posisi tidak mudah tereliminasi oleh pergerakan harga jangka pendek."
+  },
+  {
+    "timestamp": "2026-11-11 08:49 WIB",
+    "lesson": "Gunakan jarak Stop Loss berbasis volatilitas pasar seperti Average True Range (ATR) daripada persentase statis yang terlalu ketat agar tidak mudah tersapu pergerakan acak."
   }
 ]
