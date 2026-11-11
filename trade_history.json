@@ -1,9 +1,5 @@
 [
   {
-    "timestamp": "2026-11-06 15:45 WIB",
-    "lesson": "Selalu hitung volatilitas rata-rata harian dan tempatkan Stop Loss di luar area fluktuasi normal agar posisi tidak tereliminasi prematur oleh noise pasar."
-  },
-  {
     "timestamp": "2026-11-07 11:45 WIB",
     "lesson": "Selalu beri jarak Stop Loss sedikit lebih tinggi di atas level resistensi terkuat untuk mengantisipasi pergerakan harga sementara akibat volatilitas pasar."
   },
@@ -18,5 +14,9 @@
   {
     "timestamp": "2026-11-11 08:49 WIB",
     "lesson": "Gunakan jarak Stop Loss berbasis volatilitas pasar seperti Average True Range (ATR) daripada persentase statis yang terlalu ketat agar tidak mudah tersapu pergerakan acak."
+  },
+  {
+    "timestamp": "2026-11-11 17:15 WIB",
+    "lesson": "Berikan ruang toleransi Stop Loss yang lebih adaptif berbasis ATR untuk menghindari likuidasi dini akibat fluktuasi wajar pasar."
   }
 ]
