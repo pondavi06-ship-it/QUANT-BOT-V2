@@ -13,10 +13,10 @@
   "leverage": 10,
   "notional_usdt": 22.2,
   "entry_filled": false,
-  "pending_candles_count": 0,
+  "pending_candles_count": 1,
   "tp1_hit": false,
   "tp2_hit": false,
-  "last_checked_candle_ts": 1794578400000,
+  "last_checked_candle_ts": 1794579300000,
   "last_telegram_update_id": 420022516,
   "daily_tracker": {
     "date": "2026-11-13",
