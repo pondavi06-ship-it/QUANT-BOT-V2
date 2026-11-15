@@ -1,9 +1,5 @@
 [
   {
-    "timestamp": "2026-11-08 11:18 WIB",
-    "lesson": "Berikan jarak Stop Loss yang rasional berbasis volatilitas atau swing high terdekat agar posisi tidak mudah terpicu oleh pergerakan acak pasar."
-  },
-  {
     "timestamp": "2026-11-08 19:15 WIB",
     "lesson": "Berikan ruang bernapas yang cukup pada Stop Loss sesuai dengan rata-rata volatilitas harian aset agar posisi tidak mudah tereliminasi oleh pergerakan harga jangka pendek."
   },
@@ -18,5 +14,9 @@
   {
     "timestamp": "2026-11-13 08:01 WIB",
     "lesson": "Tempatkan Stop Loss di luar rentang fluktuasi normal aset atau di balik level struktur yang jelas agar posisi tidak mudah terkena noise volatilitas pasar."
+  },
+  {
+    "timestamp": "2026-11-15 15:31 WIB",
+    "lesson": "Sesuaikan jarak stop loss dengan volatilitas rata-rata aset agar posisi memiliki ruang bernapas dan tidak mudah terkena noise pasar."
   }
 ]
