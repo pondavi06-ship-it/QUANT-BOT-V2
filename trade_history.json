@@ -1,9 +1,5 @@
 [
   {
-    "timestamp": "2026-11-11 17:15 WIB",
-    "lesson": "Berikan ruang toleransi Stop Loss yang lebih adaptif berbasis ATR untuk menghindari likuidasi dini akibat fluktuasi wajar pasar."
-  },
-  {
     "timestamp": "2026-11-13 08:01 WIB",
     "lesson": "Tempatkan Stop Loss di luar rentang fluktuasi normal aset atau di balik level struktur yang jelas agar posisi tidak mudah terkena noise volatilitas pasar."
   },
@@ -18,5 +14,9 @@
   {
     "timestamp": "2026-11-16 19:31 WIB",
     "lesson": "Tempatkan stop loss dengan jarak yang mempertimbangkan volatilitas rata-rata pasar agar posisi tidak mudah terkena likuidasi dini akibat pergerakan noise."
+  },
+  {
+    "timestamp": "2026-11-16 21:46 WIB",
+    "lesson": "Tempatkan stop loss dengan mempertimbangkan rata-rata volatilitas harian aset agar posisi tidak mudah keluar akibat fluktuasi normal pasar."
   }
 ]
