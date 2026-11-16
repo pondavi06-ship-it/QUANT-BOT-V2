@@ -1,9 +1,5 @@
 [
   {
-    "timestamp": "2026-11-08 19:15 WIB",
-    "lesson": "Berikan ruang bernapas yang cukup pada Stop Loss sesuai dengan rata-rata volatilitas harian aset agar posisi tidak mudah tereliminasi oleh pergerakan harga jangka pendek."
-  },
-  {
     "timestamp": "2026-11-11 08:49 WIB",
     "lesson": "Gunakan jarak Stop Loss berbasis volatilitas pasar seperti Average True Range (ATR) daripada persentase statis yang terlalu ketat agar tidak mudah tersapu pergerakan acak."
   },
@@ -18,5 +14,9 @@
   {
     "timestamp": "2026-11-15 15:31 WIB",
     "lesson": "Sesuaikan jarak stop loss dengan volatilitas rata-rata aset agar posisi memiliki ruang bernapas dan tidak mudah terkena noise pasar."
+  },
+  {
+    "timestamp": "2026-11-16 14:47 WIB",
+    "lesson": "Sesuaikan jarak stop loss dengan ukuran volatilitas pasar seperti ATR agar posisi tidak mudah terhenti oleh pergerakan harga acak jangka pendek."
   }
 ]
