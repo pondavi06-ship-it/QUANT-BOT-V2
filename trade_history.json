@@ -1,9 +1,5 @@
 [
   {
-    "timestamp": "2026-11-13 08:01 WIB",
-    "lesson": "Tempatkan Stop Loss di luar rentang fluktuasi normal aset atau di balik level struktur yang jelas agar posisi tidak mudah terkena noise volatilitas pasar."
-  },
-  {
     "timestamp": "2026-11-15 15:31 WIB",
     "lesson": "Sesuaikan jarak stop loss dengan volatilitas rata-rata aset agar posisi memiliki ruang bernapas dan tidak mudah terkena noise pasar."
   },
@@ -18,5 +14,9 @@
   {
     "timestamp": "2026-11-16 22:19 WIB",
     "lesson": "Berikan ruang Stop Loss yang proporsional dengan tingkat volatilitas aset agar posisi tidak mudah terhenti oleh noise pergerakan jangka pendek."
+  },
+  {
+    "timestamp": "2026-11-17 07:16 WIB",
+    "lesson": "Sesuaikan penempatan Stop Loss di atas area struktur swing high terdekat atau gunakan buffer berbasis volatilitas (ATR) agar posisi tidak mudah tereliminasi oleh noise pasar."
   }
 ]
