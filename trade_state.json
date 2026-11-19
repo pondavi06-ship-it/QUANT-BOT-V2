@@ -1,25 +1,27 @@
 {
   "equity_usdt": 8.25,
-  "active": false,
-  "coin": null,
-  "bias": null,
-  "entry": null,
-  "sl": null,
-  "original_sl": null,
-  "tp1": null,
-  "tp2": null,
-  "tp3": null,
-  "margin_usdt": null,
-  "leverage": null,
-  "notional_usdt": null,
+  "active": true,
+  "coin": "SPCXUSDT",
+  "bias": "LONG",
+  "entry": 145.126444,
+  "sl": 143.947407,
+  "original_sl": 143.947407,
+  "tp1": 146.895,
+  "tp2": 148.663555,
+  "tp3": 151.021629,
+  "margin_usdt": 2.06,
+  "leverage": 10,
+  "notional_usdt": 20.6,
   "entry_filled": false,
   "pending_candles_count": 0,
   "tp1_hit": false,
   "tp2_hit": false,
-  "last_checked_candle_ts": 0,
+  "last_checked_candle_ts": 1795054500000,
   "last_telegram_update_id": 420022516,
   "daily_tracker": {
     "date": "2026-11-19",
-    "symbols": []
+    "symbols": [
+      "SPCXUSDT"
+    ]
   }
 }
