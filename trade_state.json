@@ -1,25 +1,27 @@
 {
   "equity_usdt": 9.12,
-  "active": false,
-  "coin": null,
-  "bias": null,
-  "entry": null,
-  "sl": null,
-  "original_sl": null,
-  "tp1": null,
-  "tp2": null,
-  "tp3": null,
-  "margin_usdt": null,
-  "leverage": null,
-  "notional_usdt": null,
+  "active": true,
+  "coin": "HYPEUSDT",
+  "bias": "SHORT",
+  "entry": 60.501707,
+  "sl": 61.100177,
+  "original_sl": 61.100177,
+  "tp1": 59.604,
+  "tp2": 58.706294,
+  "tp3": 57.509352,
+  "margin_usdt": 2.28,
+  "leverage": 10,
+  "notional_usdt": 22.8,
   "entry_filled": false,
   "pending_candles_count": 0,
   "tp1_hit": false,
   "tp2_hit": false,
-  "last_checked_candle_ts": 0,
+  "last_checked_candle_ts": 1795224600000,
   "last_telegram_update_id": 420022516,
   "daily_tracker": {
     "date": "2026-11-21",
-    "symbols": []
+    "symbols": [
+      "HYPEUSDT"
+    ]
   }
 }
