@@ -1,9 +1,5 @@
 [
   {
-    "timestamp": "2026-11-16 19:31 WIB",
-    "lesson": "Tempatkan stop loss dengan jarak yang mempertimbangkan volatilitas rata-rata pasar agar posisi tidak mudah terkena likuidasi dini akibat pergerakan noise."
-  },
-  {
     "timestamp": "2026-11-16 22:19 WIB",
     "lesson": "Berikan ruang Stop Loss yang proporsional dengan tingkat volatilitas aset agar posisi tidak mudah terhenti oleh noise pergerakan jangka pendek."
   },
@@ -18,5 +14,9 @@
   {
     "timestamp": "2026-11-20 11:18 WIB",
     "lesson": "Berikan ruang stop loss yang sesuai dengan rata-rata volatilitas harian aset agar posisi tidak mudah tertutup oleh pergerakan noise pasar."
+  },
+  {
+    "timestamp": "2026-11-22 15:46 WIB",
+    "lesson": "Tempatkan stop loss dengan memperhitungkan rata-rata rentang volatilitas XAGUSDT agar posisi tidak mudah tersentuh oleh fluktuasi harga jangka pendek."
   }
 ]
