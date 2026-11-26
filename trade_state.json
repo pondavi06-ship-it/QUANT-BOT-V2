@@ -16,12 +16,10 @@
   "pending_candles_count": 0,
   "tp1_hit": false,
   "tp2_hit": false,
-  "last_checked_candle_ts": 1795711500000,
+  "last_checked_candle_ts": 1795712400000,
   "last_telegram_update_id": 420022516,
   "daily_tracker": {
-    "date": "2026-11-26",
-    "symbols": [
-      "SKHYNIXUSDT"
-    ]
+    "date": "2026-11-27",
+    "symbols": []
   }
 }
