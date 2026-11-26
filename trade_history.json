@@ -1,9 +1,5 @@
 [
   {
-    "timestamp": "2026-11-18 21:49 WIB",
-    "lesson": "Berikan ruang Stop Loss yang cukup berdasarkan volatilitas aset seperti ATR dan sesuaikan ukuran posisi agar tidak mudah terkena sapuan noise pasar."
-  },
-  {
     "timestamp": "2026-11-20 11:18 WIB",
     "lesson": "Berikan ruang stop loss yang sesuai dengan rata-rata volatilitas harian aset agar posisi tidak mudah tertutup oleh pergerakan noise pasar."
   },
@@ -18,5 +14,9 @@
   {
     "timestamp": "2026-11-25 15:46 WIB",
     "lesson": "Gunakan perhitungan berbasis Average True Range (ATR) atau letakkan stop loss di luar level swing struktural yang valid agar posisi memiliki ruang gerak yang cukup dari fluktuasi harian."
+  },
+  {
+    "timestamp": "2026-11-27 03:46 WIB",
+    "lesson": "Sesuaikan jarak stop loss dengan rentang volatilitas aset seperti menggunakan ATR agar posisi tidak mudah tersapu pergerakan noise pasar."
   }
 ]
